@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33110.190
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AEPython", "AEPython.vcxproj", "{AA4FB144-A657-40DF-B29D-B6D694A4233D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{12549881-62E6-4BC9-9C0D-9A1D08AF4D78} = {12549881-62E6-4BC9-9C0D-9A1D08AF4D78}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AEPython_DLL", "AEPython_DLL.vcxproj", "{12549881-62E6-4BC9-9C0D-9A1D08AF4D78}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AA4FB144-A657-40DF-B29D-B6D694A4233D}.Debug|x64.ActiveCfg = Debug|x64
+		{AA4FB144-A657-40DF-B29D-B6D694A4233D}.Debug|x64.Build.0 = Debug|x64
+		{AA4FB144-A657-40DF-B29D-B6D694A4233D}.Release|x64.ActiveCfg = Release|x64
+		{AA4FB144-A657-40DF-B29D-B6D694A4233D}.Release|x64.Build.0 = Release|x64
+		{12549881-62E6-4BC9-9C0D-9A1D08AF4D78}.Debug|x64.ActiveCfg = Debug|x64
+		{12549881-62E6-4BC9-9C0D-9A1D08AF4D78}.Debug|x64.Build.0 = Debug|x64
+		{12549881-62E6-4BC9-9C0D-9A1D08AF4D78}.Release|x64.ActiveCfg = Release|x64
+		{12549881-62E6-4BC9-9C0D-9A1D08AF4D78}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FFF21B8B-4BB9-47EC-8A27-07D842776415}
+	EndGlobalSection
+EndGlobal
