@@ -6,6 +6,8 @@ import _AEPython as _ae
 
 __ES_class_names = [
     "Array",
+    "File",
+    "Folder",
     "Application",
     "CameraLayer",
     "CompItem",
@@ -141,6 +143,32 @@ class ESObjectFunction():
         code = f"{repr(self.__object)}.{self.__function_name}({_toESObject(args)[1:-1]});"
         return executeScript(code)
 
+class Array(ESWrapper):
+    def to_list(self):
+        dst = []
+
+        length = executeScript(f'{repr(self)}.length')
+        for i in range(0, length):
+            element = executeScript(f'{repr(self)}[{i}]')
+            dst.append(element)
+
+        return dst
+
+class File(ESWrapper):
+    def __init__(self, path: str | pathlib.Path = "", _id: str = None):
+        if _id is None:
+            ret = _executeScript(f"new File({repr(str(path))});")
+            _id = ret.split(",")[2]
+
+        super().__init__(_id)
+
+class Folder(ESWrapper):
+    def __init__(self, path: str | pathlib.Path = "", _id: str = None):
+        if _id is None:
+            ret = _executeScript(f"new Folder({repr(str(path))});")
+            _id = ret.split(",")[2]
+
+        super().__init__(_id)
 
 # ES virtual classes
 class Item(ESWrapper):pass
@@ -168,18 +196,7 @@ class Collection(ESWrapper):
         return executeScript(f"{repr(self)}[{index}];")
 
 
-# ES classes
-class Array(ESWrapper):
-    def to_list(self):
-        dst = []
-
-        length = executeScript(f'{repr(self)}.length')
-        for i in range(0, length):
-            element = executeScript(f'{repr(self)}[{i}]')
-            dst.append(element)
-
-        return dst
- 
+# ES AE classes
 class Application(ESWrapper):
     def beginUndoGroup(self, name:str):
         _ae.startUndoGroup(name)
