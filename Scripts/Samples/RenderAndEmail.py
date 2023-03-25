@@ -15,8 +15,9 @@ def RenderAndEmail():
     if safeToRunScript:
         # Check the render queue and make certain at least one item is queued.
         safeToRunScript = False
-        for i in range(1, ae.app.project.renderQueue.numItems + 1):
-            if ae.app.project.renderQueue.item(i).status == ae.RQItemStatus.QUEUED:
+        for renderQueueItem in ae.app.project.renderQueue.items:
+            print(renderQueueItem.comp.name)
+            if renderQueueItem.status == ae.RQItemStatus.QUEUED:
                 safeToRunScript = True
                 break
         if safeToRunScript == False:

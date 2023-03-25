@@ -169,16 +169,14 @@ class ScaleComposition(QtWidgets.QDialog):
 # Sets newParent as the parent of all layers in theComp that don't have parents.
 # This includes 2D/3D lights, camera, av, text, etc.
 def makeParentLayerOfAllUnparented(theComp, newParent):
-    for i in range(1, theComp.numLayers + 1):
-        curLayer = theComp.layer(i)
+    for curLayer in theComp.layers:
         if curLayer != newParent and curLayer.parent == None:
             curLayer.parent = newParent
 
 # Scales the zoom factor of every camera by the given scale_factor.
 # Handles both single values and multiple keyframe values.
 def scaleAllCameraZooms(theComp, scaleBy):
-    for i in range(1, theComp.numLayers + 1):
-        curLayer = theComp.layer(i)
+    for curLayer in theComp.layers:
         if curLayer.matchName == "ADBE Camera Layer":
             curZoom = curLayer.zoom
             if curZoom.numKeys == 0:

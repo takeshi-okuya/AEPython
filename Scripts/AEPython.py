@@ -152,19 +152,19 @@ class PropertyBase(ESWrapper):pass
 
 class Collection(ESWrapper):
     def __iter__(self):
-        object.__setattr__(self, "_i", 0)
+        object.__setattr__(self, "_i", 1)
         return self
-    
+
     def __next__(self):
         length = int(self.__getattr__("length"))
-        if self._i >= length:
+        if self._i == length + 1:
             raise StopIteration()
 
         ret = executeScript(f"{repr(self)}[{self._i}];")
         object.__setattr__(self, "_i", self._i + 1)
         return ret
-    
-    def __getitem__(self, index:int):
+
+    def __getitem__(self, index: int):
         return executeScript(f"{repr(self)}[{index}];")
 
 
@@ -183,7 +183,7 @@ class Array(ESWrapper):
 class Application(ESWrapper):
     def beginUndoGroup(self, name:str):
         _ae.startUndoGroup(name)
-    
+
     def endUndoGroup(self):
         _ae.endUndoGroup()
 
