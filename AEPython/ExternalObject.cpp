@@ -7,14 +7,14 @@
 
 static char* stringToCharP(const std::string& src)
 {
-	const auto length = src.length() + 1; 
+	const auto length = src.length() + 1;
 	char* dst = new char[length];
 	strcpy_s(dst, length, src.c_str());
 
 	return dst;
 }
 
-// Python.appendString("Python code string");
+// Python.exec("Python code string");
 DllExport long exec(TaggedData* argv, long argc, TaggedData* retval)
 {
 	if (argc != 1 || argv[0].type != kTypeString)
@@ -22,12 +22,33 @@ DllExport long exec(TaggedData* argv, long argc, TaggedData* retval)
 		return kESErrBadArgumentList;
 	}
 
-	std::string utf8_code(argv[0].data.string);
-	AEPython::exec(utf8_code);
+	AEPython::exec(argv[0].data.string);
 
 	retval->type = kTypeUndefined;
 
 	return kESErrOK;
+}
+
+// Python.eval("Python code string");
+DllExport long eval(TaggedData* argv, long argc, TaggedData* retval)
+{
+	if (argc != 1 || argv[0].type != kTypeString)
+	{
+		return kESErrBadArgumentList;
+	}
+
+	std::string ret = AEPython::eval(argv[0].data.string);
+
+	if (ret.length() == 0)
+	{
+		return kESErrEval;
+	}
+	else
+	{
+		retval->data.string = stringToCharP(ret);
+		retval->type = kTypeScript;
+		return kESErrOK;
+	}
 }
 
 DllExport void ESFreeMem(void* p)
@@ -42,7 +63,7 @@ DllExport long ESGetVersion()
 
 DllExport char* ESInitialize(const TaggedData** argv, long argc)
 {
-	return "exec_s";
+	return "exec_s,eval_a";
 }
 
 DllExport void ESTerminate()

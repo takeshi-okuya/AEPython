@@ -42,45 +42,35 @@ __ES_class_names = [
 
 class _ESId(str):pass
 
+def _code_to_ESId(code: str):
+    id = code[code.rindex(",")+1: -1]
+    return _ESId(id)
+
+
+def _create_ESWrapper(class_name: str, id: int):
+    if class_name in __ES_class_names:
+        cls = eval(class_name)
+        return cls(_id=_ESId(id))
+    else:
+        return ESWrapper(_ESId(id))
+
 
 def _executeScript(code: str):
     code = repr(code)
     return _ae.executeScript(f"__AEPython_executeScript({code})")
 
 
-def executeScript(code: str):
-    ret = _executeScript(code)
-
-    if ret == "null" or ret == "":
-        return None
-
-    results = ret.split(",")
-    ret_type = results[0]
-    if ret_type == "boolean":
-        return results[1] == "true"
-    elif ret_type == "number":
-        v = float(results[1])
-        if v == int(v):
-            return int(v)
-        else:
-            return v
-    elif ret_type == "string":
-        return ret.replace("string,", "", 1)
-    elif ret_type == "function":
-        return ESFunction(_ESId(results[2]))
-    elif ret_type == "object":
-        if results[1] in __ES_class_names:
-            cls = eval(results[1])
-            return cls(_id=_ESId(results[2]))
-        else:
-            return ESWrapper(_ESId(results[2]))
-    else:
-        raise Exception(f"ESTypeError: {results[0]}")
+def executeScript(es_code: str):
+    py_code = _executeScript(es_code)
+    return eval(py_code)
 
 
 def __getattr__(name):
     return executeScript(name)
 
+
+_py_objects = {}
+_py_objects_count = 0
 
 def _to_ES_expression(obj):
     if obj is None:
@@ -92,7 +82,17 @@ def _to_ES_expression(obj):
     elif isinstance(obj, ESWrapper):
         return f"__AEPython_objects[{obj._es_id}]"
     else:
-        raise TypeError
+        global _py_objects, _py_objects_count
+        _py_objects_count += 1
+        _py_objects[_py_objects_count] = obj
+        return f"new __AEPython_PyObject({_py_objects_count})"
+
+def _eval(code: str):
+    obj = eval(code)
+    return _to_ES_expression(obj)
+
+def _del_py_object(id):
+    del _py_objects[id]
 
 
 class ESWrapper(object):
@@ -157,14 +157,14 @@ class Array(ESWrapper):
                 raise TypeError
         else:
             if _id is None and len(args) == 0:
-                id = _executeScript("[]").split(",")[2]
+                ret = _executeScript("[]")
             elif isinstance(_id, int) and _id >= 0 and len(args) == 0:
-                id = _executeScript(f"Array({_id})").split(",")[2]
+                ret = _executeScript(f"Array({_id})")
             else:
                 values = [_id] + list(args)
                 code = f"[{','.join([_to_ES_expression(v) for v in values])}];"
-                id = _executeScript(code).split(",")[2]
-            _id = _ESId(id)
+                ret = _executeScript(code)
+            _id = _code_to_ESId(ret)
 
         super().__init__(_id)
         self.__iter__()
@@ -195,7 +195,7 @@ class File(ESWrapper):
     def __init__(self, path: str | pathlib.Path = "", _id: _ESId = None):
         if _id is None:
             ret = _executeScript(f"new File({repr(str(path))});")
-            _id = _ESId(ret.split(",")[2])
+            _id = _code_to_ESId(ret)
 
         super().__init__(_id)
 
@@ -203,7 +203,7 @@ class Folder(ESWrapper):
     def __init__(self, path: str | pathlib.Path = "", _id: _ESId = None):
         if _id is None:
             ret = _executeScript(f"new Folder({repr(str(path))});")
-            _id = _ESId(ret.split(",")[2])
+            _id = _code_to_ESId(ret)
 
         super().__init__(_id)
 
@@ -260,7 +260,7 @@ class ImportOptions(ESWrapper):
             else:
                 code = f"new ImportOptions({repr(file)})"
             ret = _executeScript(code)
-            _id = _ESId(ret.split(",")[2])
+            _id = _code_to_ESId(ret)
 
         super().__init__(_id)
 
@@ -270,7 +270,7 @@ class KeyframeEase(ESWrapper):
     def __init__(self, x=None, y=None, _id: _ESId = None):
         if _id is None:
             ret = _executeScript(f"new KeyframeEase({x}, {y})")
-            _id = _ESId(ret.split(",")[2])
+            _id = _code_to_ESId(ret)
 
         super().__init__(_id)
 
@@ -290,7 +290,7 @@ class MarkerValue(ESWrapper):
 
             code = f"new MarkerValue({comment}, {chapter}, {url}, {frameTarget}, {cuePointName}, {params})"
             ret = _executeScript(code)
-            _id = _ESId(ret.split(",")[2])
+            _id = _code_to_ESId(ret)
 
         super().__init__(_id)
 
@@ -310,7 +310,7 @@ class Shape(ESWrapper):
     def __init__(self, _id: _ESId = None):
         if _id is None:
             ret = _executeScript("new Shape()")
-            _id = _ESId(ret.split(",")[2])
+            _id = _code_to_ESId(ret)
 
         super().__init__(_id)
 
@@ -323,7 +323,7 @@ class TextDocument(ESWrapper):
         if _id is None:
             text = repr(docText)
             ret = _executeScript(f"new TextDocument({text})")
-            _id = _ESId(ret.split(",")[2])
+            _id = _code_to_ESId(ret)
 
         super().__init__(_id)
 

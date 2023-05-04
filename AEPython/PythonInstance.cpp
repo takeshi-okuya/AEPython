@@ -107,6 +107,23 @@ import qtae
 )");
 }
 
+void showError(py::error_already_set& e) {
+	try
+	{
+		py::print(e.what(), py::arg("file") = py::module_::import("sys").attr("stderr"));
+	}
+#pragma warning(push)
+#pragma warning(disable:4101)
+	catch (py::error_already_set& _)
+	{
+		std::string msg = "Python error.\n";
+		msg += e.what();
+		AEGP_SuiteHandler suites(sP);
+		suites.UtilitySuite5()->AEGP_ReportInfo(S_my_id, msg.c_str());
+	}
+#pragma warning(pop)
+}
+
 void AEPython::exec(const std::string& utf8_code)
 {
 	try
@@ -115,20 +132,21 @@ void AEPython::exec(const std::string& utf8_code)
 	}
 	catch (py::error_already_set& e)
 	{
-		try
-		{
-			py::print(e.what(), py::arg("file") = py::module_::import("sys").attr("stderr"));
-		}
-#pragma warning(push)
-#pragma warning(disable:4101)
-		catch (py::error_already_set& _)
-		{
-			std::string msg = "Python error.\n";
-			msg += e.what();
-			AEGP_SuiteHandler suites(sP);
-			suites.UtilitySuite5()->AEGP_ReportInfo(S_my_id, msg.c_str());
-		}
-#pragma warning(pop)
+		showError(e);
+	}
+}
+
+std::string AEPython::eval(const std::string& utf8_code)
+{
+	try
+	{
+		static auto _eval = py::module_::import("AEPython").attr("_eval");
+		return _eval(utf8_code).cast<std::string>();
+	}
+	catch (py::error_already_set& e)
+	{
+		showError(e);
+		return "";
 	}
 }
 
