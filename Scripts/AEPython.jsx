@@ -79,6 +79,7 @@ function __AEPython_deleteObject(id) {
 
 __AEPython_PyObject = function (id) {
     this.id = id;
+    this.base = new AEPython_PyObjectBase(id);
 }
 
 __AEPython_PyObject.prototype.callattr = function (name, args, keyArgs) {

@@ -5,6 +5,8 @@
 
 #define DllExport extern "C" __declspec( dllexport )
 
+SoServerInterface* gpServer = nullptr;
+
 static char* stringToCharP(const std::string& src)
 {
 	const auto length = src.length() + 1;
@@ -68,4 +70,60 @@ DllExport char* ESInitialize(const TaggedData** argv, long argc)
 
 DllExport void ESTerminate()
 {
+}
+
+DllExport void* ESMallocMem(size_t nBytes)
+{
+	return malloc(nBytes);
+}
+
+ESerror_t PyObjectBase_initialize(SoHObject hObject, int argc, TaggedData* argv)
+{
+	if (argc == 1 && argv[0].type == kTypeInteger)
+	{
+		auto* id = new long(argv[0].data.intval);
+		gpServer->setClientData(hObject, id);
+		return kESErrOK;
+	}
+	else
+	{
+		gpServer->setClientData(hObject, nullptr);
+		return kESErrBadArgumentList;
+	}
+}
+
+ESerror_t PyObjectBase_finalize(SoHObject hObject)
+{
+	long* id;
+	gpServer->getClientData(hObject, (void**)&id);
+
+	if (id != nullptr)
+	{
+		AEPython::del_py_object(*id);
+		delete id;
+	}
+
+	return kESErrOK;
+}
+
+SoObjectInterface objectInterface =
+{
+	PyObjectBase_initialize,
+	nullptr, // pull
+	nullptr, // get
+	nullptr, // call
+	nullptr, // valueOf
+	nullptr, // toString
+	PyObjectBase_finalize
+};
+
+DllExport int  ESClientInterface(SoCClient_e kReason, SoServerInterface* pServer, SoHServer hServer)
+{
+	if (kReason == kSoCClient_init)
+	{
+		gpServer = pServer;
+		gpServer->addClass(hServer, "AEPython_PyObjectBase", &objectInterface);
+	}
+
+	return 0;
 }

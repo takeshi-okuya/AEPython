@@ -150,6 +150,19 @@ std::string AEPython::eval(const std::string& utf8_code)
 	}
 }
 
+void AEPython::del_py_object(const long id)
+{
+	try
+	{
+		static auto _del_py_object = py::module_::import("AEPython").attr("_del_py_object");
+		_del_py_object(id);
+	}
+	catch (py::error_already_set& e)
+	{
+		showError(e);
+	}
+}
+
 void AEPython::showWindow()
 {
 	exec(u8R"(
