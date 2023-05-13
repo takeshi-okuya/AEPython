@@ -24,11 +24,11 @@ DllExport long exec(TaggedData* argv, long argc, TaggedData* retval)
 		return kESErrBadArgumentList;
 	}
 
-	AEPython::exec(argv[0].data.string);
+	bool success = AEPython::exec(argv[0].data.string);
 
 	retval->type = kTypeUndefined;
 
-	return kESErrOK;
+	return success ? kESErrOK : kESErrEval;
 }
 
 // Python.eval("Python code string");

@@ -124,15 +124,17 @@ void showError(py::error_already_set& e) {
 #pragma warning(pop)
 }
 
-void AEPython::exec(const std::string& utf8_code)
+bool AEPython::exec(const std::string& utf8_code)
 {
 	try
 	{
 		py::exec(utf8_code, py::globals(), *locals);
+		return true;
 	}
 	catch (py::error_already_set& e)
 	{
 		showError(e);
+		return false;
 	}
 }
 
