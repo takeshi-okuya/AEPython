@@ -1,5 +1,3 @@
-import re
-import json
 import pathlib
 
 import _AEPython as _ae
@@ -42,6 +40,9 @@ __ES_class_names = [
 ]
 
 
+class _ESId(str):pass
+
+
 def _executeScript(code: str):
     code = repr(code)
     return _ae.executeScript(f"__AEPython_executeScript({code})")
@@ -66,42 +67,44 @@ def executeScript(code: str):
     elif ret_type == "string":
         return ret.replace("string,", "", 1)
     elif ret_type == "function":
-            return ESFunction(results[2])
+        return ESFunction(_ESId(results[2]))
     elif ret_type == "object":
         if results[1] in __ES_class_names:
-            obj = eval(f"{results[1]}(_id={results[2]})")
-            if isinstance(obj, Array):
-                return obj.to_list()
-            else:
-                return obj
+            cls = eval(results[1])
+            return cls(_id=_ESId(results[2]))
         else:
-            return ESWrapper(results[2])
+            return ESWrapper(_ESId(results[2]))
     else:
-        raise Exception(f"ES type error: {results[0]}")
+        raise Exception(f"ESTypeError: {results[0]}")
 
 
 def __getattr__(name):
     return executeScript(name)
 
 
-def _toESObject(obj):
-    class Encoder(json.JSONEncoder):
-        def default(self, obj):
-            if isinstance(obj, ESWrapper):
-                return repr(obj)
-            return json.JSONEncoder.default(self, obj)
-
-    dst =  json.dumps(obj, cls=Encoder)
-    return re.sub(r'\"__AEPython_objects\[(\d+)\]\"', r'__AEPython_objects[\1]', dst)
+def _to_ES_expression(obj):
+    if obj is None:
+        return "null"
+    elif isinstance(obj, bool):
+        return "true" if obj is True else "false"
+    elif isinstance(obj, (int, float, str)):
+        return repr(obj)
+    elif isinstance(obj, ESWrapper):
+        return f"__AEPython_objects[{obj._es_id}]"
+    else:
+        raise TypeError
 
 
 class ESWrapper(object):
-    def __init__(self, _id:str):
+    def __init__(self, _id: _ESId):
+        if isinstance(_id, _ESId) == False:
+            raise Exception(f"IdTypeError:{type(_id)}:{_id}")
+
         super().__setattr__("_es_id", _id)
 
     def __repr__(self) -> str:
         return f"__AEPython_objects[{self._es_id}]"
-    
+
     def __str__(self) -> str:
         return super().__repr__() + f"(id:{self._es_id})"
 
@@ -115,7 +118,7 @@ class ESWrapper(object):
             return False
 
     def __getattr__(self, name: str) -> any:
-        ret =  executeScript(f"{repr(self)}.{name};")
+        ret = executeScript(f"{repr(self)}.{name};")
         if isinstance(ret, ESFunction):
             return ESObjectFunction(self, name)
         else:
@@ -125,50 +128,85 @@ class ESWrapper(object):
         if hasattr(super(), __name):
             super().__setattr__(__name, __value)
         else:
-            __value = _toESObject(__value)
+            __value = _to_ES_expression(__value)
             executeScript(f"__AEPython_setattr({self._es_id}, {repr(__name)}, {__value});")
-
 
 class ESFunction(ESWrapper):
     def __call__(self, *args, **kwds) -> any:
-        code = f"__AEPython_callObject({self._es_id}, {_toESObject(args)[1:-1]});"
+        args = f"{', '.join(_to_ES_expression(arg) for arg in args)}"
+        code = f"""var __func={repr(self)};
+                   __func({args});"""
         return executeScript(code)
 
 class ESObjectFunction():
-    def __init__(self, object, function_name):
+    def __init__(self, object: ESWrapper, function_name: str):
         self.__object = object
         self.__function_name = function_name
 
     def __call__(self, *args, **kwds) -> any:
-        code = f"{repr(self.__object)}.{self.__function_name}({_toESObject(args)[1:-1]});"
+        args = f"{', '.join(_to_ES_expression(arg) for arg in args)}"
+        code = f"{repr(self.__object)}.{self.__function_name}({args});"
         return executeScript(code)
 
+
+# ES classes
 class Array(ESWrapper):
-    def to_list(self):
-        dst = []
+    def __init__(self, _id: _ESId = None, *args):
+        if isinstance(_id, _ESId):
+            if len(args) > 0:
+                raise TypeError
+        else:
+            if _id is None and len(args) == 0:
+                id = _executeScript("[]").split(",")[2]
+            elif isinstance(_id, int) and _id >= 0 and len(args) == 0:
+                id = _executeScript(f"Array({_id})").split(",")[2]
+            else:
+                values = [_id] + list(args)
+                code = f"[{','.join([_to_ES_expression(v) for v in values])}];"
+                id = _executeScript(code).split(",")[2]
+            _id = _ESId(id)
 
-        length = executeScript(f'{repr(self)}.length')
-        for i in range(0, length):
-            element = executeScript(f'{repr(self)}[{i}]')
-            dst.append(element)
+        super().__init__(_id)
+        self.__iter__()
 
-        return dst
+    def __iter__(self):
+        object.__setattr__(self, "_i", 0)
+        return self
+
+    def __next__(self):
+        length = int(self.length)
+        if self._i == length:
+            raise StopIteration()
+
+        ret = executeScript(f"{repr(self)}[{self._i}];")
+        object.__setattr__(self, "_i", self._i + 1)
+        return ret
+
+    def __getitem__(self, index: int):
+        return executeScript(f"{repr(self)}[{index}];")
+    
+    def __len__(self):
+        return int(self.length)
+
+    def __str__(self):
+        return super().__str__() + "[" + executeScript(f"{repr(self)}.toString()") + "]"
 
 class File(ESWrapper):
-    def __init__(self, path: str | pathlib.Path = "", _id: str = None):
+    def __init__(self, path: str | pathlib.Path = "", _id: _ESId = None):
         if _id is None:
             ret = _executeScript(f"new File({repr(str(path))});")
-            _id = ret.split(",")[2]
+            _id = _ESId(ret.split(",")[2])
 
         super().__init__(_id)
 
 class Folder(ESWrapper):
-    def __init__(self, path: str | pathlib.Path = "", _id: str = None):
+    def __init__(self, path: str | pathlib.Path = "", _id: _ESId = None):
         if _id is None:
             ret = _executeScript(f"new Folder({repr(str(path))});")
-            _id = ret.split(",")[2]
+            _id = _ESId(ret.split(",")[2])
 
         super().__init__(_id)
+
 
 # ES virtual classes
 class Item(ESWrapper):pass
@@ -184,7 +222,7 @@ class Collection(ESWrapper):
         return self
 
     def __next__(self):
-        length = int(self.__getattr__("length"))
+        length = int(self.length)
         if self._i == length + 1:
             raise StopIteration()
 
@@ -198,7 +236,7 @@ class Collection(ESWrapper):
 
 # ES AE classes
 class Application(ESWrapper):
-    def beginUndoGroup(self, name:str):
+    def beginUndoGroup(self, name: str):
         _ae.startUndoGroup(name)
 
     def endUndoGroup(self):
@@ -211,7 +249,7 @@ class FolderItem(Item):pass
 class FootageItem(AVItem):pass
 
 class ImportOptions(ESWrapper):
-    def __init__(self, file: str | pathlib.Path | ESWrapper = None, _id: str = None):
+    def __init__(self, file: str | pathlib.Path | ESWrapper = None, _id: _ESId = None):
         if _id is None:
             if file is None:
                 code = "new ImportOptions()"
@@ -222,17 +260,17 @@ class ImportOptions(ESWrapper):
             else:
                 code = f"new ImportOptions({repr(file)})"
             ret = _executeScript(code)
-            _id = ret.split(",")[2]
+            _id = _ESId(ret.split(",")[2])
 
         super().__init__(_id)
 
 class ItemCollection(Collection):pass
 
 class KeyframeEase(ESWrapper):
-    def __init__(self, x=None, y=None, _id: str = None):
+    def __init__(self, x=None, y=None, _id: _ESId = None):
         if _id is None:
             ret = _executeScript(f"new KeyframeEase({x}, {y})")
-            _id = ret.split(",")[2]
+            _id = _ESId(ret.split(",")[2])
 
         super().__init__(_id)
 
@@ -241,7 +279,7 @@ class LightLayer(Layer):pass
 
 class MarkerValue(ESWrapper):
     def __init__(self, comment=None, chapter=None, url=None, frameTarget=None,
-                 cuePointName=None, params=None, _id: str = None):
+                 cuePointName=None, params=None, _id: _ESId = None):
         if _id is None:
             comment = repr(comment)
             chapter = "undefined" if chapter is None else repr(chapter)
@@ -252,7 +290,7 @@ class MarkerValue(ESWrapper):
 
             code = f"new MarkerValue({comment}, {chapter}, {url}, {frameTarget}, {cuePointName}, {params})"
             ret = _executeScript(code)
-            _id = ret.split(",")[2]
+            _id = _ESId(ret.split(",")[2])
 
         super().__init__(_id)
 
@@ -269,10 +307,10 @@ class RQItemCollection(Collection):pass
 class Settings(ESWrapper):pass
 
 class Shape(ESWrapper):
-    def __init__(self, _id: str = None):
+    def __init__(self, _id: _ESId = None):
         if _id is None:
             ret = _executeScript("new Shape()")
-            _id = ret.split(",")[2]
+            _id = _ESId(ret.split(",")[2])
 
         super().__init__(_id)
 
@@ -281,11 +319,11 @@ class SolidSource(FootageSource):pass
 class System(ESWrapper):pass
 
 class TextDocument(ESWrapper):
-    def __init__(self, docText="", _id: str = None):
+    def __init__(self, docText="", _id: _ESId = None):
         if _id is None:
             text = repr(docText)
             ret = _executeScript(f"new TextDocument({text})")
-            _id = ret.split(",")[2]
+            _id = _ESId(ret.split(",")[2])
 
         super().__init__(_id)
 

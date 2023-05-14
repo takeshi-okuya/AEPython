@@ -56,16 +56,3 @@ function __AEPython_setattr(id, _name, value) {
 function __AEPython_deleteObject(id) {
     delete __AEPython_objects[id];
 }
-
-function __AEPython_callObject(id, _args) {
-    const func = __AEPython_objects[id];
-    
-    var code = "func(";
-    for(var i=1; i < arguments.length; i++){
-        code += "arguments[" + i + "]";
-        if (i < arguments.length - 1){code += ", ";}
-    }
-    code += ");";
-
-    return eval(code);
-}
