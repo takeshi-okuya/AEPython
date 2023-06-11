@@ -1,7 +1,9 @@
 import sys
 import os
 
-from PySide2 import QtGui, QtWidgets
+from PySide2.QtCore import *
+from PySide2.QtGui import *
+from PySide2.QtWidgets import *
 
 import _AEPython as _ae
 import AEPython as ae
@@ -11,11 +13,11 @@ __PythonWindow = None
 
 
 def __init_qt():
-    app = QtWidgets.QApplication.instance()
+    app = QApplication.instance()
     if app is not None:
         return
 
-    app = QtWidgets.QApplication(sys.argv)
+    app = QApplication(sys.argv)
 
     style = '''
 QMainWindow, QDialog, QAbstractButton, QLabel{
@@ -27,15 +29,15 @@ QMainWindow, QDialog, QAbstractButton, QLabel{
     app.setStyleSheet(style)
 
 
-class PythonWindow(QtWidgets.QMainWindow):
+class PythonWindow(QMainWindow):
     class Logger:
-        def __init__(self, editor: QtWidgets.QTextEdit, color=None, show=None):
+        def __init__(self, editor: QTextEdit, color=None, show=None):
             self.editor = editor
             self.color = editor.textColor() if color is None else color
             self.show = show
 
         def write(self, message: str):
-            self.editor.moveCursor(QtGui.QTextCursor.End)
+            self.editor.moveCursor(QTextCursor.End)
             self.editor.setTextColor(self.color)
             self.editor.insertPlainText(message)
 
@@ -47,37 +49,37 @@ class PythonWindow(QtWidgets.QMainWindow):
 
         self.setWindowTitle('AE Python')
 
-        self.centralWidget = QtWidgets.QWidget()
+        self.centralWidget = QWidget()
         self.setCentralWidget(self.centralWidget)
 
-        layout = QtWidgets.QVBoxLayout()
+        layout = QVBoxLayout()
         self.centralWidget.setLayout(layout)
 
-        label_output = QtWidgets.QLabel("Output:")
+        label_output = QLabel("Output:")
         layout.addWidget(label_output)
 
-        self.textedit_output = QtWidgets.QTextEdit("")
+        self.textedit_output = QTextEdit("")
         self.textedit_output.setStyleSheet("background-color: #e0e0e0;")
         layout.addWidget(self.textedit_output)
 
-        label_code = QtWidgets.QLabel("Code:")
+        label_code = QLabel("Code:")
         layout.addWidget(label_code)
 
-        self.textedit_code = QtWidgets.QPlainTextEdit("")
+        self.textedit_code = QPlainTextEdit("")
         layout.addWidget(self.textedit_code)
 
-        self.button_execute = QtWidgets.QPushButton("Execute")
+        self.button_execute = QPushButton("Execute")
         self.button_execute.clicked.connect(self.__execute)
         layout.addWidget(self.button_execute)
 
-        exec_action = QtWidgets.QAction("Execute Python File", self)
+        exec_action = QAction("Execute Python File", self)
         exec_action.triggered.connect(self.__execute_file)
 
         file_menu = self.menuBar().addMenu("File")
         file_menu.addAction(exec_action)
 
         sys.stdout = self.Logger(self.textedit_output)
-        sys.stderr = self.Logger(self.textedit_output, QtGui.QColor(255, 0, 0), self.show)
+        sys.stderr = self.Logger(self.textedit_output, QColor(255, 0, 0), self.show)
         print("AE Python 1.0.0")
 
     def __execute(self):
@@ -85,7 +87,7 @@ class PythonWindow(QtWidgets.QMainWindow):
         exec(code, globals(), _ae.locals)
 
     def __execute_file(self):
-        file_path = QtWidgets.QFileDialog.getOpenFileName(self, "Execute Python File", "", "Python (*.py)")[0]
+        file_path = QFileDialog.getOpenFileName(self, "Execute Python File", "", "Python (*.py)")[0]
         if file_path == '':
             return
 
@@ -111,7 +113,7 @@ def GetQtAEMainWindow():
     global __MainWindow
     if __MainWindow is None:
         import win32gui
-        __MainWindow = QtWidgets.QWidget()
+        __MainWindow = QWidget()
         win32gui.SetParent(__MainWindow.winId(), _ae.getMainHWND())
     return __MainWindow
 
