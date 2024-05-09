@@ -23,6 +23,15 @@ Python.import = function (name) {
     return Python.eval("__import__('importlib').import_module('" + name + "')");
 }
 
+Python.importFile = function (pyFilePath) {
+    pyFilePath = pyFilePath.replace("\\", "/");
+    var util = Python.import("importlib.util");
+    var spec = util.callattr("spec_from_file_location", [pyFilePath, pyFilePath]);
+    var module = util.callattr("module_from_spec", [spec]);
+    spec.getattr("loader").callattr("exec_module", [module]);
+    return module;
+}
+
 Python.reload = function (module) {
     return Python.import("importlib").callattr("reload", [module]);
 }
