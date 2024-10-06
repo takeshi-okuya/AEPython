@@ -11,7 +11,7 @@ import importlib.util
 import AEPython as ae
 import qtae
 
-from PySide2 import QtWidgets, QtCore
+from PySide6 import QtWidgets, QtCore
 
 
 class ScriptDemos(QtWidgets.QDialog):

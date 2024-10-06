@@ -60,7 +60,7 @@ DllExport void ESFreeMem(void* p)
 
 DllExport long ESGetVersion()
 {
-	return 1;
+	return 2;
 }
 
 DllExport char* ESInitialize(const TaggedData** argv, long argc)

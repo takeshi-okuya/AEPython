@@ -1,25 +1,16 @@
-$PYTHON_ZIP = Join-Path $PSScriptRoot "python-3.10.9-embed-amd64.zip"
+$PYTHON_ZIP = Join-Path $PSScriptRoot "python-3.11.9-embed-amd64.zip"
 $GETPIP_PY = Join-Path $PSScriptRoot "get-pip.py"
 $TARGET_ROOT = Join-Path (Split-Path $PSScriptRoot -Qualifier) AEGP
-$PYTHON_ROOT = Join-Path $TARGET_ROOT "AEPython\\python-3.10.9-embed-amd64"
+$PYTHON_ROOT = Join-Path $TARGET_ROOT "AEPython\\python-3.11.9-embed-amd64"
 $PYTHON_EXE = Join-Path $PYTHON_ROOT "python.exe"
-$PTH = Join-Path $PYTHON_ROOT "python310._pth"
+$PTH = Join-Path $PYTHON_ROOT "python311._pth"
 
 if (!(Test-Path $PYTHON_ZIP)){
-    Invoke-WebRequest "https://www.python.org/ftp/python/3.10.9/python-3.10.9-embed-amd64.zip" -OutFile $PYTHON_ZIP
+    Invoke-WebRequest "https://www.python.org/ftp/python/3.11.9/python-3.11.9-embed-amd64.zip" -OutFile $PYTHON_ZIP
 }
 
 if (!(Test-Path $GETPIP_PY)){
     Invoke-WebRequest "https://bootstrap.pypa.io/get-pip.py" -OutFile $GETPIP_PY
-}
-
-if (!(Test-Path $PYTHON_ROOT)){
-    Expand-Archive -Path $PYTHON_ZIP -DestinationPath $PYTHON_ROOT
-    cd $PYTHON_ROOT
-
-    (Get-Content -Path $PTH) -replace "#import site", "import site" | Set-Content -Path $PTH
-    .\python.exe $GETPIP_PY
-    .\python.exe -m pip install -r (Join-Path $PSScriptRoot "requirements.txt")
 }
 
 Copy-Item -Path (Join-Path $PSScriptRoot "Scripts\\AEPython.py") -Destination (Join-Path $TARGET_ROOT "AEPython\\AEPython.py") -Force
@@ -29,5 +20,15 @@ Copy-Item (Join-Path $PSScriptRoot "Scripts\\samples") -Recurse (Join-Path $TARG
 Copy-Item (Join-Path $PSScriptRoot "README.md") -Recurse (Join-Path $TARGET_ROOT "README.md") -Force
 Copy-Item (Join-Path $PSScriptRoot "README_ja.md") -Recurse (Join-Path $TARGET_ROOT "README_ja.md") -Force
 Copy-Item (Join-Path $PSScriptRoot "LICENSE") -Recurse (Join-Path $TARGET_ROOT "LICENSE") -Force
+
+if (!(Test-Path $PYTHON_ROOT)){
+    Expand-Archive -Path $PYTHON_ZIP -DestinationPath $PYTHON_ROOT
+    cd $PYTHON_ROOT
+
+    (Get-Content -Path $PTH) -replace "#import site", "import site" | Set-Content -Path $PTH
+    .\python.exe $GETPIP_PY
+    .\python.exe -m pip install --compile -r (Join-Path $PSScriptRoot "requirements.txt")
+    .\python.exe -m compileall (Join-Path $TARGET_ROOT "AEPython")
+}
 
 Pause

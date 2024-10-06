@@ -8,7 +8,7 @@
 import AEPython as ae
 import qtae
 
-from PySide2 import QtWidgets, QtCore
+from PySide6 import QtWidgets, QtCore
 
 scriptName = "Scale Selected Layers"
 

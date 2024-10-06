@@ -1,7 +1,7 @@
 import sys
 import os
 
-from PySide2 import QtGui, QtWidgets
+from PySide6 import QtGui, QtWidgets
 
 import _AEPython as _ae
 import AEPython as ae
@@ -70,7 +70,7 @@ class PythonWindow(QtWidgets.QMainWindow):
         self.button_execute.clicked.connect(self.__execute)
         layout.addWidget(self.button_execute)
 
-        exec_action = QtWidgets.QAction("Execute Python File", self)
+        exec_action = QtGui.QAction("Execute Python File", self)
         exec_action.triggered.connect(self.__execute_file)
 
         file_menu = self.menuBar().addMenu("File")
@@ -78,7 +78,7 @@ class PythonWindow(QtWidgets.QMainWindow):
 
         sys.stdout = self.Logger(self.textedit_output)
         sys.stderr = self.Logger(self.textedit_output, QtGui.QColor(255, 0, 0), self.show)
-        print("AE Python 1.0.0")
+        print("AE Python 2.0.0")
 
     def __execute(self):
         code = self.textedit_code.toPlainText()
