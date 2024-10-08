@@ -108,13 +108,14 @@ import _AEPython
 sys.path.append(os.path.dirname(_AEPython.getPluginPath()))
 import AEPython as ae
 import qtae
-)");
+)", "");
 }
 
-void showError(py::error_already_set& e) {
+void showError(py::error_already_set& e, const std::string& esStack) {
 	try
 	{
-		py::print(e.what(), py::arg("file") = py::module_::import("sys").attr("stderr"));
+		auto msg = esStack + e.what();
+		py::print(msg.c_str(), py::arg("file") = py::module_::import("sys").attr("stderr"));
 	}
 #pragma warning(push)
 #pragma warning(disable:4101)
@@ -128,7 +129,7 @@ void showError(py::error_already_set& e) {
 #pragma warning(pop)
 }
 
-bool AEPython::exec(const std::string& utf8_code)
+bool AEPython::exec(const std::string& utf8_code, const std::string& esStack)
 {
 	try
 	{
@@ -137,12 +138,12 @@ bool AEPython::exec(const std::string& utf8_code)
 	}
 	catch (py::error_already_set& e)
 	{
-		showError(e);
+		showError(e, esStack);
 		return false;
 	}
 }
 
-std::string AEPython::eval(const std::string& utf8_code)
+std::string AEPython::eval(const std::string& utf8_code, const std::string& esStack)
 {
 	try
 	{
@@ -151,7 +152,7 @@ std::string AEPython::eval(const std::string& utf8_code)
 	}
 	catch (py::error_already_set& e)
 	{
-		showError(e);
+		showError(e, esStack);
 		return "";
 	}
 }
@@ -165,7 +166,8 @@ void AEPython::del_py_object(const long id)
 	}
 	catch (py::error_already_set& e)
 	{
-		showError(e);
+		auto esStack = "<SoObjectInterface.finalize at PyObjects[" + std::to_string(id) + "]>\n";
+		showError(e, esStack);
 	}
 }
 
@@ -174,5 +176,5 @@ void AEPython::showWindow()
 	exec(u8R"(
 import qtae
 qtae.ShowPythonWindow()
-)");
+)", "");
 }

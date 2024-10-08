@@ -1,5 +1,13 @@
 ﻿Python = new ExternalObject("lib:" + BridgeTalk.getAppPath(BridgeTalk.appName) + "/../Plug-ins/AEPython/AEPython.aex")
 
+Python.exec = function(code){
+    return Python._exec(code, $.stack);
+}
+
+Python.eval = function (code) {
+    return Python._eval(code, $.stack);
+}
+
 Python.execFile = function (path) {
     const file = new File(path);
     if (file.exist == false) {

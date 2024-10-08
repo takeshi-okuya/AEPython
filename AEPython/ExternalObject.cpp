@@ -17,14 +17,14 @@ static char* stringToCharP(const std::string& src)
 }
 
 // Python.exec("Python code string");
-DllExport long exec(TaggedData* argv, long argc, TaggedData* retval)
+DllExport long _exec(TaggedData* argv, long argc, TaggedData* retval)
 {
-	if (argc != 1 || argv[0].type != kTypeString)
+	if (argc != 2 || argv[0].type != kTypeString || argv[1].type != kTypeString)
 	{
 		return kESErrBadArgumentList;
 	}
 
-	bool success = AEPython::exec(argv[0].data.string);
+	bool success = AEPython::exec(argv[0].data.string, argv[1].data.string);
 
 	retval->type = kTypeUndefined;
 
@@ -32,14 +32,14 @@ DllExport long exec(TaggedData* argv, long argc, TaggedData* retval)
 }
 
 // Python.eval("Python code string");
-DllExport long eval(TaggedData* argv, long argc, TaggedData* retval)
+DllExport long _eval(TaggedData* argv, long argc, TaggedData* retval)
 {
-	if (argc != 1 || argv[0].type != kTypeString)
+	if (argc != 2 || argv[0].type != kTypeString || argv[1].type != kTypeString)
 	{
 		return kESErrBadArgumentList;
 	}
 
-	std::string ret = AEPython::eval(argv[0].data.string);
+	std::string ret = AEPython::eval(argv[0].data.string, argv[1].data.string);
 
 	if (ret.length() == 0)
 	{
@@ -65,7 +65,7 @@ DllExport long ESGetVersion()
 
 DllExport char* ESInitialize(const TaggedData** argv, long argc)
 {
-	return "exec_s,eval_a";
+	return "_exec_ss,_eval_ss";
 }
 
 DllExport void ESTerminate()
