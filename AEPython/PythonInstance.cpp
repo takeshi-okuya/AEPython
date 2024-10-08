@@ -31,6 +31,10 @@ static std::wstring executeScript(std::wstring w_code)
 	AEGP_MemHandle outErrorStringPH = 0;
 
 	ERR(suites.UtilitySuite5()->AEGP_IsScriptingAvailable(&outAvailablePB));
+	if (outAvailablePB == false) {
+		py::exec("raise Exception('ScriptingNotAvailableError')");
+	}
+
 	auto code = toString(w_code);
 	ERR(suites.UtilitySuite5()->AEGP_ExecuteScript(S_my_id, code.c_str(), true, &outResultPH, &outErrorStringPH));
 
