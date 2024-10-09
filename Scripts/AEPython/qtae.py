@@ -78,7 +78,7 @@ class PythonWindow(QtWidgets.QMainWindow):
 
         sys.stdout = self.Logger(self.textedit_output)
         sys.stderr = self.Logger(self.textedit_output, QtGui.QColor(255, 0, 0), self.show)
-        print("AE Python 2.0.0")
+        print("AE Python", ae.__version__)
 
     def __execute(self):
         code = self.textedit_code.toPlainText()

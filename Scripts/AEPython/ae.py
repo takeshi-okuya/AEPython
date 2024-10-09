@@ -2,6 +2,7 @@ import pathlib
 
 import _AEPython as _ae
 
+__version__ = ("2.0.0b1", 2, 0, 0, "b1", 2)
 __ES_class_names = [
     "Array",
     "File",
