@@ -18,9 +18,7 @@
 #
 # A button labeled "?" provides a brief explanation.
 
-import AEPython as ae
-import qtae
-
+from AEPython import ae, qtae
 from PySide6 import QtWidgets, QtCore
 
 scriptName = "Find and Replace Text"

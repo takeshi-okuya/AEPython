@@ -13,8 +13,7 @@ if (!(Test-Path $GETPIP_PY)){
     Invoke-WebRequest "https://bootstrap.pypa.io/get-pip.py" -OutFile $GETPIP_PY
 }
 
-Copy-Item -Path (Join-Path $PSScriptRoot "Scripts\\AEPython.py") -Destination (Join-Path $TARGET_ROOT "AEPython\\AEPython.py") -Force
-Copy-Item -Path (Join-Path $PSScriptRoot "Scripts\\qtae.py") -Destination (Join-Path $TARGET_ROOT "AEPython\\qtae.py") -Force
+Copy-Item -Path (Join-Path $PSScriptRoot "Scripts\\AEPython") -Recurse (Join-Path $TARGET_ROOT "AEPython/Scripts/AEPython") -Force
 Copy-Item -Path (Join-Path $PSScriptRoot "Scripts\\AEPython.jsx") -Destination (Join-Path $TARGET_ROOT "AEPython.jsx") -Force
 Copy-Item (Join-Path $PSScriptRoot "Scripts\\samples") -Recurse (Join-Path $TARGET_ROOT "samples") -Force
 Copy-Item (Join-Path $PSScriptRoot "README.md") -Recurse (Join-Path $TARGET_ROOT "README.md") -Force

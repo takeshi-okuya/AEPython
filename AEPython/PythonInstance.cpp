@@ -105,9 +105,8 @@ import sys
 import os
 import _AEPython
 
-sys.path.append(os.path.dirname(_AEPython.getPluginPath()))
-import AEPython as ae
-import qtae
+sys.path.append(os.path.join(os.path.dirname(_AEPython.getPluginPath()), "Scripts"))
+from AEPython import ae, qtae
 )", "");
 }
 
@@ -147,7 +146,7 @@ std::string AEPython::eval(const std::string& utf8_code, const std::string& esSt
 {
 	try
 	{
-		static auto _eval = py::module_::import("AEPython").attr("_eval");
+		static auto _eval = py::module_::import("AEPython.ae").attr("_eval");
 		return _eval(utf8_code).cast<std::string>();
 	}
 	catch (py::error_already_set& e)
@@ -161,7 +160,7 @@ void AEPython::del_py_object(const long id)
 {
 	try
 	{
-		static auto _del_py_object = py::module_::import("AEPython").attr("_del_py_object");
+		static auto _del_py_object = py::module_::import("AEPython.ae").attr("_del_py_object");
 		_del_py_object(id);
 	}
 	catch (py::error_already_set& e)
@@ -174,7 +173,7 @@ void AEPython::del_py_object(const long id)
 void AEPython::showWindow()
 {
 	exec(u8R"(
-import qtae
+from AEPython import qtae
 qtae.ShowPythonWindow()
 )", "");
 }

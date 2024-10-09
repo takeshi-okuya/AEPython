@@ -2,7 +2,7 @@
 #
 # This script reorders layers in the active comp, sorted by inPoint.
 
-import AEPython as ae
+from AEPython import ae
 
 scriptName = "Sort Layers by In Point"
 

@@ -8,9 +8,7 @@ import sys
 import os.path
 import importlib.util
 
-import AEPython as ae
-import qtae
-
+from AEPython import ae, qtae
 from PySide6 import QtWidgets, QtCore
 
 

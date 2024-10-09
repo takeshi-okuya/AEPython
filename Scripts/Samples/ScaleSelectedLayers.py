@@ -5,9 +5,7 @@
 # First, it prompts the user for a scale_factor.
 # Next, it scales all selected layers, including cameras.
 
-import AEPython as ae
-import qtae
-
+from AEPython import ae, qtae
 from PySide6 import QtWidgets, QtCore
 
 scriptName = "Scale Selected Layers"

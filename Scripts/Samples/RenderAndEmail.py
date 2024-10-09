@@ -1,6 +1,6 @@
 ﻿# Render and Email
 
-import AEPython as ae
+from AEPython import ae
 
 from support import ChangeEmailSettings, email_methods
 
