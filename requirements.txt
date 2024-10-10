@@ -1,2 +1,3 @@
 PySide6==6.5.3
 pywin32==307
+usd-core==24.8
