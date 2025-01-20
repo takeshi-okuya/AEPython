@@ -39,7 +39,9 @@ DllExport long _eval(TaggedData* argv, long argc, TaggedData* retval)
 		return kESErrBadArgumentList;
 	}
 
-	std::string ret = AEPython::eval(argv[0].data.string, argv[1].data.string);
+	auto code = argv[0].data.string;
+	auto stack = argv[1].data.string;
+	std::string ret = AEPython::eval(code, stack);
 
 	if (ret.length() == 0)
 	{

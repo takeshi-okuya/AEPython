@@ -143,5 +143,7 @@ __AEPython_PyObject.prototype.setitem = function (key, value) {
 }
 
 __AEPython_PyObject.prototype.toString = function () {
-    return "[PyObject " + this.callattr("__str__") + "]";
+    var code = "str(_py_objects[" + this.id + "])";
+    var str = Python._eval(code, "__AEPython_PyObject.toString()");
+    return "[PyObject " + str + "]";
 }
