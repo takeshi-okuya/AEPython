@@ -1,5 +1,6 @@
 import sys
 import os
+import logging
 
 from PySide6 import QtGui, QtWidgets
 
@@ -28,7 +29,7 @@ QMainWindow, QDialog, QAbstractButton, QLabel{
 
 
 class PythonWindow(QtWidgets.QMainWindow):
-    class Logger:
+    class Logger(logging.Handler):
         def __init__(self, editor: QtWidgets.QTextEdit, color=None, show=None):
             self.editor = editor
             self.color = editor.textColor() if color is None else color
