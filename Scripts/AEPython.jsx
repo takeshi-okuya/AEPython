@@ -131,7 +131,8 @@ __AEPython_PyObject.prototype.setattr = function (name, value) {
 }
 
 __AEPython_PyObject.prototype.getitem = function (key) {
-    var code = "_py_objects[" + this.id + "].__getitem__(" + key + ")";
+    var _key = __AEPython_toPyExpression(key);
+    var code = "_py_objects[" + this.id + "].__getitem__(" + _key + ")";
     return Python.eval(code);
 }
 
