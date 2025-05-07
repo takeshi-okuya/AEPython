@@ -399,4 +399,4 @@ FodyWeavers.xsd
 
 /Win/*.rc
 /get-pip.py
-/python-3.10.9-embed-amd64.zip
+/python-3.*-embed-amd64.zip
