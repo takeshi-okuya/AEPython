@@ -39,5 +39,14 @@ class TestAEPython(unittest.TestCase):
         for key in src:
             self.assertEqual(src[key], getattr(dst, key))
 
+    def test_LayerClasses(self):
+        comp = ae.app.project.items.addComp("LayerTestComp", 1920, 1080, 1, 10, 24)
+
+        solid_layer = comp.layers.addSolid(ae.Array(1, 1, 1), "SolidLayer", 1920, 1080, 1)
+        self.assertEqual(solid_layer.__class__, ae.AVLayer)
+
+        text_layer = comp.layers.addText("TextLayer")
+        self.assertEqual(text_layer.__class__, ae.TextLayer)
+
 
 unittest.TextTestRunner().run(unittest.TestLoader().loadTestsFromTestCase(TestAEPython))

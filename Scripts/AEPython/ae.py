@@ -8,6 +8,7 @@ __ES_class_names = [
     "File",
     "Folder",
     "Application",
+    "AVLayer",
     "CameraLayer",
     "CompItem",
     "FileSource",
@@ -226,7 +227,6 @@ class Folder(ESWrapper):
 class Item(ESWrapper):pass
 class AVItem(Item):pass
 class Layer(ESWrapper):pass
-class AVLayer(Layer):pass
 class FootageSource(ESWrapper):pass
 class PropertyBase(ESWrapper):pass
 
@@ -256,6 +256,7 @@ class Application(ESWrapper):
     def endUndoGroup(self):
         _ae.endUndoGroup()
 
+class AVLayer(Layer):pass
 class CameraLayer(Layer):pass
 class CompItem(AVItem):pass
 class FileSource(FootageSource):pass
