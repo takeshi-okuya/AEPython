@@ -56,9 +56,14 @@ def _create_ESWrapper(class_name: str, id: int):
         return ESWrapper(_ESId(id))
 
 
-def _executeScript(code: str):
-    code = repr(code)
-    return _ae.executeScript(f"__AEPython_executeScript({code})")
+def _executeScript(es_code: str) -> str:
+    repr_es_code = repr(es_code)
+    py_code: str = _ae.executeScript(f"__AEPython_executeScript({repr_es_code})")
+
+    if py_code.startswith('raise '):
+        exec(py_code)
+    else:
+        return py_code
 
 
 def executeScript(es_code: str):

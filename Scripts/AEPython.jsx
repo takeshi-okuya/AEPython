@@ -78,9 +78,8 @@ function __AEPython_executeScript(code) {
         const ret = eval(code)
         return __AEPython_toPyExpression(ret)
     } catch (e) {
-        var error_message = 'print("' + e.message + '", file=sys.stderr)';
-        Python.exec(error_message);
-        throw new Error(e.message);
+        var msg = code + ' File "' + e.fileName + '", line ' + e.line + ', ' + e.message;
+        return 'raise RuntimeError(' + __AEPython_toPyExpression(msg) + ')';
     }
 }
 
