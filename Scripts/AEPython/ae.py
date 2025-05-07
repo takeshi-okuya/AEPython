@@ -67,7 +67,15 @@ def _executeScript(es_code: str) -> str:
 
 
 def executeScript(es_code: str):
-    py_code = _executeScript(es_code)
+    error = None
+    try:
+        py_code = _executeScript(es_code)
+    except RuntimeError as e:
+        error = e
+
+    if error:  # At outside the except block, reduces error message lines.
+        raise RuntimeError(error)
+
     return eval(py_code)
 
 
