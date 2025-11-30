@@ -21,7 +21,7 @@ static auto getMainHWND()
 	return hwnd;
 }
 
-static std::wstring executeScript(std::wstring w_code)
+static std::string executeScript(std::string code)
 {
 	A_Err err = A_Err_NONE;
 	AEGP_SuiteHandler suites(sP);
@@ -35,12 +35,11 @@ static std::wstring executeScript(std::wstring w_code)
 		py::exec("raise Exception('ScriptingNotAvailableError')");
 	}
 
-	auto code = toString(w_code);
-	ERR(suites.UtilitySuite5()->AEGP_ExecuteScript(S_my_id, code.c_str(), true, &outResultPH, &outErrorStringPH));
+	ERR(suites.UtilitySuite5()->AEGP_ExecuteScript(S_my_id, code.c_str(), false, &outResultPH, &outErrorStringPH));
 
 	A_char* res = NULL;
 	ERR(suites.MemorySuite1()->AEGP_LockMemHandle(outResultPH, reinterpret_cast<void**>(&res)));
-	std::wstring strRes = toWString(res);
+	std::string strRes = res;
 
 	A_char* error = NULL;
 	ERR(suites.MemorySuite1()->AEGP_LockMemHandle(outErrorStringPH, reinterpret_cast<void**>(&error)));
