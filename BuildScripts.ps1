@@ -1,12 +1,12 @@
-$PYTHON_ZIP = Join-Path $PSScriptRoot "python-3.11.9-embed-amd64.zip"
+$PYTHON_ZIP = Join-Path $PSScriptRoot "python-3.13.15-embed-amd64.zip"
 $GETPIP_PY = Join-Path $PSScriptRoot "get-pip.py"
-$TARGET_ROOT = Join-Path (Split-Path $PSScriptRoot -Qualifier) AEGP
-$PYTHON_ROOT = Join-Path $TARGET_ROOT "AEPython\\python-3.11.9-embed-amd64"
+$TARGET_ROOT = Join-Path (Split-Path $PSScriptRoot -Qualifier) build/AEGP
+$PYTHON_ROOT = Join-Path $TARGET_ROOT "AEPython\\python-3.13.15-embed-amd64"
 $PYTHON_EXE = Join-Path $PYTHON_ROOT "python.exe"
-$PTH = Join-Path $PYTHON_ROOT "python311._pth"
+$PTH = Join-Path $PYTHON_ROOT "python313._pth"
 
 if (!(Test-Path $PYTHON_ZIP)){
-    Invoke-WebRequest "https://www.python.org/ftp/python/3.11.9/python-3.11.9-embed-amd64.zip" -OutFile $PYTHON_ZIP
+    Invoke-WebRequest "https://www.python.org/ftp/python/3.13.15/python-3.13.15-embed-amd64.zip" -OutFile $PYTHON_ZIP
 }
 
 if (!(Test-Path $GETPIP_PY)){

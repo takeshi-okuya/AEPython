@@ -65,19 +65,19 @@ static std::wstring getPluginPath()
 	return path;
 }
 
-static void startUndoGroup(std::wstring wname)
+static void startUndoGroup(std::u8string_view u8name)
 {
 	A_Err err = A_Err_NONE;
 	AEGP_SuiteHandler suites(sP);
-	auto name = toString(wname);
-	ERR(suites.UtilitySuite1()->AEGP_StartUndoGroup(name.c_str()));
+	std::string name(u8name.begin(), u8name.end());
+	ERR(suites.UtilitySuite6()->AEGP_StartUndoGroup(name.c_str()));
 }
 
 static void endUndoGroup()
 {
 	A_Err err = A_Err_NONE;
 	AEGP_SuiteHandler suites(sP);
-	ERR(suites.UtilitySuite1()->AEGP_EndUndoGroup());
+	ERR(suites.UtilitySuite6()->AEGP_EndUndoGroup());
 }
 
 #define PY_CLASS(m, name) py::class_<name>(m, #name)
@@ -128,7 +128,7 @@ void showError(py::error_already_set& e, const std::string& esStack) {
 #pragma warning(pop)
 }
 
-bool AEPython::exec(const std::string& utf8_code, const std::string& esStack)
+bool AEPython::exec(std::u8string_view utf8_code, const std::string& esStack)
 {
 	try
 	{
@@ -142,7 +142,7 @@ bool AEPython::exec(const std::string& utf8_code, const std::string& esStack)
 	}
 }
 
-std::string AEPython::eval(const std::string& utf8_code, const std::string& esStack)
+std::string AEPython::eval(std::u8string_view utf8_code, const std::string& esStack)
 {
 	try
 	{

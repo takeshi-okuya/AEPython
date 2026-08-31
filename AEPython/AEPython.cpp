@@ -84,7 +84,7 @@ static void InitPython()
 	auto plugin_dir = GetPluginDir();
 
 	std::string path = getenv("PATH");
-	path = plugin_dir + "\\python-3.11.9-embed-amd64;" + path;
+	path = plugin_dir + "\\python-3.13.15-embed-amd64;" + path;
 	_putenv_s("PATH", path.c_str());
 
 	auto dll = plugin_dir + "\\AEPython.dll";

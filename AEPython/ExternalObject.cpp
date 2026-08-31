@@ -24,7 +24,7 @@ DllExport long _exec(TaggedData* argv, long argc, TaggedData* retval)
 		return kESErrBadArgumentList;
 	}
 
-	bool success = AEPython::exec(argv[0].data.string, argv[1].data.string);
+	const bool success = AEPython::exec(reinterpret_cast<char8_t*>(argv[0].data.string), argv[1].data.string);
 
 	retval->type = kTypeUndefined;
 
@@ -41,7 +41,7 @@ DllExport long _eval(TaggedData* argv, long argc, TaggedData* retval)
 
 	auto code = argv[0].data.string;
 	auto stack = argv[1].data.string;
-	std::string ret = AEPython::eval(code, stack);
+	std::string ret = AEPython::eval(reinterpret_cast<char8_t*>(code), stack);
 
 	if (ret.length() == 0)
 	{
@@ -65,9 +65,11 @@ DllExport long ESGetVersion()
 	return 2;
 }
 
+
 DllExport char* ESInitialize(const TaggedData** argv, long argc)
 {
-	return "_exec_ss,_eval_ss";
+	static char ESInitializeFunctions[] = "_exec_ss, _eval_ss";
+	return ESInitializeFunctions;
 }
 
 DllExport void ESTerminate()
@@ -123,8 +125,9 @@ DllExport int  ESClientInterface(SoCClient_e kReason, SoServerInterface* pServer
 {
 	if (kReason == kSoCClient_init)
 	{
+		char className[] = "AEPython_PyObjectBase";
 		gpServer = pServer;
-		gpServer->addClass(hServer, "AEPython_PyObjectBase", &objectInterface);
+		gpServer->addClass(hServer, className, &objectInterface);
 	}
 
 	return 0;
